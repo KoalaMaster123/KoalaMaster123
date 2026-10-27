@@ -1,0 +1,575 @@
+<title>Click-on Bordforstærker</title>
+<style>
+  /* Layout: enkelt teknisk spec-dokument. 3D-viewer som centerpiece-kort &oslash;verst,
+     derefter m&aring;l-/materiale-tabeller stylet som et datablad (mono-tal, status-tags). */
+  :root{
+    --bg:#f3f4f6;
+    --surface:#ffffff;
+    --surface-2:#eceef1;
+    --border:#d8dce2;
+    --fg:#171a21;
+    --fg-muted:#5b6472;
+    --accent:#2b5fac;
+    --accent-ink:#ffffff;
+    --accent-soft:#e4ecfb;
+    --confirmed:#19815a;
+    --confirmed-soft:#e2f4ec;
+    --estimate:#9c6a10;
+    --estimate-soft:#faf1dd;
+    --dim:#9c5a0a;
+    --dim-bg:#fff7ec;
+    --font-display:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171c; --surface:#1b1f26; --surface-2:#20252d; --border:#2c323c;
+      --fg:#e7e9ec; --fg-muted:#9aa3b1; --accent:#7aa6ec; --accent-ink:#0d1420;
+      --accent-soft:#213353; --confirmed:#5ecb9b; --confirmed-soft:#17322a;
+      --estimate:#e3b355; --estimate-soft:#3a2e13; --dim:#e8b55f; --dim-bg:#2c2416; color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14171c; --surface:#1b1f26; --surface-2:#20252d; --border:#2c323c;
+    --fg:#e7e9ec; --fg-muted:#9aa3b1; --accent:#7aa6ec; --accent-ink:#0d1420;
+    --accent-soft:#213353; --confirmed:#5ecb9b; --confirmed-soft:#17322a;
+    --estimate:#e3b355; --estimate-soft:#3a2e13; --dim:#e8b55f; --dim-bg:#2c2416; color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--fg); font-family:var(--font-display);
+    margin:0; padding-left:max(16px, env(safe-area-inset-left,0px));
+    padding-right:max(16px, env(safe-area-inset-right,0px));
+    line-height:1.5; font-size:15px;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding-block:28px 64px; display:flex; flex-direction:column; gap:28px}
+
+  header.page{display:flex; flex-direction:column; gap:10px}
+  .eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent)}
+  h1{font-size:clamp(26px,5vw,34px); margin:0; text-wrap:balance; letter-spacing:-.01em}
+  .lede{color:var(--fg-muted); max-width:62ch; font-size:16px}
+  .status-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px}
+  .pill{font-family:var(--font-mono); font-size:11.5px; padding:3px 9px; border-radius:99px; border:1px solid var(--border); color:var(--fg-muted); background:var(--surface-2)}
+
+  section{display:flex; flex-direction:column; gap:14px}
+  h2{font-size:19px; margin:0; display:flex; align-items:center; gap:9px}
+  h2 .n{font-family:var(--font-mono); color:var(--fg-muted); font-size:14px}
+  p{margin:0}
+  .muted{color:var(--fg-muted)}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px}
+
+  /* ---- 3D viewer ---- */
+  .viewer-card{padding:0; overflow:hidden}
+  .viewer-top{display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border)}
+  .btn-row{display:flex; flex-wrap:wrap; gap:6px}
+  button.v-btn{
+    font-family:var(--font-mono); font-size:12px; padding:6px 11px; border-radius:8px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--fg); cursor:pointer;
+  }
+  button.v-btn:hover{border-color:var(--accent)}
+  button.v-btn[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+  .canvas-box{position:relative; width:100%; aspect-ratio:16/11; background:var(--surface-2)}
+  .canvas-box canvas{display:block; width:100%; height:100%; touch-action:none}
+  .viewer-msg{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:13px; color:var(--fg-muted); text-align:center; padding:20px}
+  .viewer-foot{display:flex; justify-content:space-between; gap:12px; padding:10px 14px; font-size:12px; color:var(--fg-muted); border-top:1px solid var(--border); flex-wrap:wrap}
+  .swatch{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; vertical-align:middle}
+  .dim-label{
+    font-family:var(--font-mono); font-size:11px; font-variant-numeric:tabular-nums;
+    color:var(--dim); background:var(--dim-bg); border:1px solid var(--dim);
+    padding:1px 6px; border-radius:5px; white-space:nowrap; transform:translate(-50%,-50%);
+    pointer-events:none; user-select:none;
+  }
+
+  /* ---- data tables ---- */
+  .tbl-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:12px}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:13.5px}
+  thead th{text-align:left; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--fg-muted); font-weight:500; padding:10px 12px; border-bottom:1px solid var(--border); background:var(--surface-2)}
+  tbody td{padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  td.num, th.num{font-family:var(--font-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  td.lbl{color:var(--fg); font-weight:500; white-space:nowrap}
+  .tag{font-family:var(--font-mono); font-size:10.5px; padding:2px 7px; border-radius:99px; white-space:nowrap; display:inline-block}
+  .tag.ok{background:var(--confirmed-soft); color:var(--confirmed)}
+  .tag.est{background:var(--estimate-soft); color:var(--estimate)}
+
+  /* ---- material cards ---- */
+  .mat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+  .mat-card{border:1px solid var(--border); border-radius:12px; padding:14px; background:var(--surface); display:flex; flex-direction:column; gap:6px; min-width:0}
+  .mat-card .part{font-family:var(--font-mono); font-size:11px; color:var(--accent); text-transform:uppercase; letter-spacing:.04em}
+  .mat-card h3{font-size:15px; margin:0}
+  .mat-card p{font-size:13px; color:var(--fg-muted)}
+
+  ul.clean{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px}
+  ul.clean li{display:flex; gap:10px; font-size:14px}
+  ul.clean li::before{content:"\2192"; color:var(--accent); flex:none}
+  ol.steps{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:10px; counter-reset:s}
+  ol.steps li{display:flex; gap:11px; font-size:14px}
+  ol.steps li::before{counter-increment:s; content:counter(s); font-family:var(--font-mono); font-size:12px; color:var(--accent-ink); background:var(--accent); width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none}
+
+  .gallery{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+  .gallery figure{margin:0; border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--surface-2)}
+  .gallery img{display:block; width:100%; height:auto}
+  .gallery figcaption{font-family:var(--font-mono); font-size:11px; color:var(--fg-muted); padding:6px 8px; border-top:1px solid var(--border)}
+
+  footer{font-size:12.5px; color:var(--fg-muted); border-top:1px solid var(--border); padding-top:16px}
+
+  @media (max-width:480px){
+    table{min-width:460px}
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="page">
+    <span class="eyebrow">Festival-bord &middot; reservedelskoncept</span>
+    <h1>Click-on Bordforst&aelig;rker</h1>
+    <p class="lede">Parametrisk konceptmodel for en skruel&oslash;s forst&aelig;rker til det klassiske sammenklappelige festivalbord &mdash; monteres under bordpladens midtersamling, hvor bordet normalt kn&aelig;kker.</p>
+    <div class="status-row">
+      <span class="pill">Koncept v0.1</span>
+      <span class="pill">Engangsbrug</span>
+      <span class="pill">Ikke produktionsklar</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-viewer">
+    <h2 id="h-viewer"><span class="n">01</span> 3D-model</h2>
+    <div class="card viewer-card">
+      <div class="viewer-top">
+        <div class="btn-row" role="group" aria-label="Visningsvinkel">
+          <button class="v-btn" data-view="iso" aria-pressed="true">Isometrisk</button>
+          <button class="v-btn" data-view="top">Plan (oppefra)</button>
+          <button class="v-btn" data-view="end">Gavl-snit</button>
+        </div>
+        <div class="btn-row">
+          <button class="v-btn" id="toggle-table" aria-pressed="true">Bordplade: til</button>
+          <button class="v-btn" id="toggle-dims" aria-pressed="true">M&aring;l: til</button>
+          <button class="v-btn" id="toggle-wire" aria-pressed="false">Tr&aring;dnet</button>
+        </div>
+      </div>
+      <div class="canvas-box" id="canvas-box">
+        <div class="viewer-msg" id="viewer-msg">Indl&aelig;ser 3D-model&hellip;</div>
+      </div>
+      <div class="viewer-foot">
+        <span><span class="swatch" style="background:var(--accent)"></span>Forst&aelig;rker (bl&aring;)</span>
+        <span><span class="swatch" style="background:#b9c2cf"></span>Bordplade + ben &mdash; kun reference, ikke del af filen</span>
+        <span class="muted">Tr&aelig;k for at rotere &middot; scroll for zoom</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-concept">
+    <h2 id="h-concept"><span class="n">02</span> S&aring;dan virker det</h2>
+    <div class="card">
+      <p>Forst&aelig;rkeren er en <strong>H-ramme</strong>: to rails (hver 300&nbsp;mm) r&aelig;kker 150&nbsp;mm ind p&aring; hver bordplade-halvdel og er forbundet af en tv&aelig;rbj&aelig;lke, der l&oslash;ber hele bordets bredde. Et galvaniseret st&aring;lb&aring;nd er st&oslash;bt ind i hver rails overflange for b&oslash;jningsstivhed. For enden af hver rail griber en vippel&aring;s-klo fat om bordpladens lange kant &mdash; fire kloer i alt, placeret symmetrisk om midtersamlingen.</p>
+      <p class="muted" style="margin-top:10px">Mekanikken er bevidst et splejse-princip, ikke en ren snap-fit: fire kant-forankrede klemmer giver et reelt kraftpar om samlingen, hvor bordets eget h&aelig;ngsel ikke kan optage b&oslash;jningsmoment. Se chatten for den fulde mekaniske begrundelse.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-table-dims">
+    <h2 id="h-table-dims"><span class="n">03</span> Bordets m&aring;l <span class="tag ok">bekr&aelig;ftet</span></h2>
+    <p class="muted">Sammenlignet p&aring; tv&aelig;rs af Bauhaus, Jula, Gardeon og Trigano (alle "180&nbsp;cm fold-i-midten"-modeller). Designet er lagt midt i det f&aelig;lles sp&aelig;nd.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>M&aring;l</th><th class="num">Markedssp&aelig;nd</th><th class="num">Brugt i design</th><th>Kilde</th></tr></thead>
+        <tbody>
+          <tr><td class="lbl">L&aelig;ngde (&aring;bent)</td><td class="num">1800 mm</td><td class="num">1800 mm</td><td class="muted">Alle</td></tr>
+          <tr><td class="lbl">Bredde</td><td class="num">740&ndash;760 mm</td><td class="num">740 mm</td><td class="muted">Bauhaus, Gardeon</td></tr>
+          <tr><td class="lbl">Bordpladetykkelse</td><td class="num">25&ndash;40 mm</td><td class="num">32 mm</td><td class="muted">Trigano 40, Gardeon 35</td></tr>
+          <tr><td class="lbl">Halvdel-l&aelig;ngde</td><td class="num">900 mm</td><td class="num">900 mm</td><td class="muted">1800/2</td></tr>
+          <tr><td class="lbl">V&aelig;gt, komplet bord</td><td class="num">11&ndash;16 kg</td><td class="num">&mdash;</td><td class="muted">Bauhaus, Trigano</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-bracket-dims">
+    <h2 id="h-bracket-dims"><span class="n">04</span> Forst&aelig;rkerens m&aring;l</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Del</th><th class="num">M&aring;l</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="lbl">Rail-l&aelig;ngde (pr. halvdel)</td><td class="num">150 mm</td><td><span class="tag ok">designvalg</span></td></tr>
+          <tr><td class="lbl">Rail-bredde / -h&oslash;jde</td><td class="num">30 &times; 24 mm</td><td><span class="tag ok">designvalg</span></td></tr>
+          <tr><td class="lbl">V&aelig;gtykkelse, kanal</td><td class="num">4,5 mm</td><td><span class="tag ok">designvalg</span></td></tr>
+          <tr><td class="lbl">St&aring;l-indl&aelig;g</td><td class="num">20 &times; 3 mm</td><td><span class="tag ok">designvalg</span></td></tr>
+          <tr><td class="lbl">Afstand til kant (inset)</td><td class="num">20 mm</td><td><span class="tag ok">designvalg</span></td></tr>
+          <tr><td class="lbl">Luft ved midtersamling</td><td class="num">4 mm</td><td><span class="tag est">antagelse</span></td></tr>
+          <tr><td class="lbl">Kant-profil / "l&aelig;be" under pladen</td><td class="num">&mdash;</td><td><span class="tag est">ikke i specs</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">De to sidste r&aelig;kker er ikke offentliggjort af nogen producent &mdash; de er ingeni&oslash;rm&aelig;ssigt rimelige antagelser, ikke m&aring;l. De <strong>skal</strong> verificeres ved at vende et fysisk bord om, f&oslash;r der sk&aelig;res v&aelig;rkt&oslash;j.</p>
+  </section>
+
+  <section aria-labelledby="h-materials">
+    <h2 id="h-materials"><span class="n">05</span> Materialer</h2>
+    <p class="muted">Simplificeret af at produktet er <strong>engangsbrug</strong>: ingen krav om UV-holdbarhed over &aring;r eller tusindvis af sp&aelig;nde-cyklusser &mdash; kun &eacute;n montering og ~8 dages statisk last.</p>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <span class="part">Rails + tv&aelig;rbj&aelig;lke</span>
+        <h3>PA6-GF30 (glasfiberforst&aelig;rket nylon)</h3>
+        <p>Stiv og slagfast nok til b&oslash;jningslasten uden UV-stabilisator &mdash; bruges kun i 8 dage.</p>
+      </div>
+      <div class="mat-card">
+        <span class="part">Stivner-indl&aelig;g</span>
+        <h3>Galvaniseret b&aring;ndst&aring;l, 20&times;3 mm</h3>
+        <p>Almindelig st&aring;l er nok &mdash; ingen grund til fjederst&aring;l, da delen ikke skal holde til gentagne cyklusser.</p>
+      </div>
+      <div class="mat-card">
+        <span class="part">Vippel&aring;s / kant-klo</span>
+        <h3>Samme PA6-GF30, evt. POM i lejet</h3>
+        <p>Tool-free kvart-vip giver reelt klemtryk &mdash; langt st&aelig;rkere end en ren snap-tap.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-open">
+    <h2 id="h-open"><span class="n">06</span> &Aring;bent, f&oslash;r produktion</h2>
+    <div class="card">
+      <ul class="clean">
+        <li>Kant-profilens geometri (hvor meget "l&aelig;be" er der reelt at hage fast i p&aring; 2-3 konkrete bordmodeller?)</li>
+        <li>Ribbe-m&oslash;nster under bordpladen &mdash; er der plads til railsene uden at st&oslash;de mod ribber?</li>
+        <li>Om 2 kloer pr. langside er nok, eller om vridning (torsion) kr&aelig;ver en 3. forankring</li>
+        <li>Vippel&aring;sens faktiske kamprofil &mdash; kr&aelig;ver fysisk prototype og iteration, ikke kun CAD</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-next">
+    <h2 id="h-next"><span class="n">07</span> N&aelig;ste skridt</h2>
+    <ol class="steps">
+      <li>K&oslash;b/l&aring;n 2-3 forskellige "klassiske" festivalborde og m&aring;l undersiden direkte (kant-profil, ribber, pladetykkelse)</li>
+      <li>3D-print denne model i PLA/PETG til pasnings-test &mdash; ikke styrketest, kun geometri</li>
+      <li>Opdater de antagne m&aring;l i filen og gentag, f&oslash;r der l&aelig;gges penge i spr&oslash;jtest&oslash;be-v&aelig;rkt&oslash;j</li>
+    </ol>
+  </section>
+
+  <section class="gallery-section" aria-labelledby="h-gallery">
+    <h2 id="h-gallery"><span class="n">08</span> Statiske referencebilleder</h2>
+    <div class="gallery">
+      <figure><img src="hero_context.png" alt="Isometrisk visning med bordplade"><figcaption>Isometrisk, m. bordplade</figcaption></figure>
+      <figure><img src="hero_part.png" alt="Isometrisk visning af forst&aelig;rkeren alene"><figcaption>Isometrisk, kun del</figcaption></figure>
+      <figure><img src="plan_top.png" alt="Plan oppefra"><figcaption>Plan (oppefra)</figcaption></figure>
+      <figure><img src="elevation_end.png" alt="Gavl-snit"><figcaption>Gavl-snit</figcaption></figure>
+    </div>
+  </section>
+
+  <footer>
+    Parametrisk kilde (.scad) og STL er delt separat i samtalen. Alle m&aring;l i mm. Dette er et konceptdokument til intern beslutning, ikke en produktionstegning.
+  </footer>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+  import * as THREE from "three";
+  import { STLLoader } from "three/addons/loaders/STLLoader.js";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+  import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+
+  const box = document.getElementById('canvas-box');
+  const msg = document.getElementById('viewer-msg');
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const TABLE = { half: 900, width: 740, thick: 32, gap: 4 }; // bekraeftede/design-maal, mm
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 1, 10000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  box.appendChild(renderer.domElement);
+
+  const labelRenderer = new CSS2DRenderer();
+  labelRenderer.domElement.style.position = 'absolute';
+  labelRenderer.domElement.style.top = '0';
+  labelRenderer.domElement.style.left = '0';
+  labelRenderer.domElement.style.pointerEvents = 'none';
+  box.appendChild(labelRenderer.domElement);
+
+  function readTokens(){
+    const cs = getComputedStyle(document.documentElement);
+    return {
+      bg: cs.getPropertyValue('--surface-2').trim() || '#eceef1',
+      fg: cs.getPropertyValue('--fg-muted').trim() || '#5b6472',
+      accent: cs.getPropertyValue('--accent').trim() || '#2b5fac'
+    };
+  }
+  let tokens = readTokens();
+  scene.background = new THREE.Color(tokens.bg);
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x303840, 1.05);
+  scene.add(hemi);
+  const dir1 = new THREE.DirectionalLight(0xffffff, 1.1);
+  dir1.position.set(500, 800, 650);
+  scene.add(dir1);
+  const dir2 = new THREE.DirectionalLight(0xffffff, 0.45);
+  dir2.position.set(-600, 200, -500);
+  scene.add(dir2);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 200;
+  controls.maxDistance = 6000;
+  controls.autoRotate = !reduceMotion;
+  controls.autoRotateSpeed = 1.1;
+  controls.addEventListener('start', () => { controls.autoRotate = false; });
+
+  let modelCenter = new THREE.Vector3(0, 0, 0);
+  let modelRadius = 500;
+
+  function frameView(kind){
+    const d = Math.max(modelRadius * 3.3, 400);
+    let pos;
+    if (kind === 'top') pos = new THREE.Vector3(0, d * 1.15, 0.0001);
+    else if (kind === 'end') pos = new THREE.Vector3(d * 1.3, modelRadius * 0.25, 0);
+    else pos = new THREE.Vector3(d * 0.62, d * 0.55, d * 0.9);
+    camera.position.copy(modelCenter.clone().add(pos));
+    controls.target.copy(modelCenter);
+    camera.near = Math.max(d / 500, 0.5);
+    camera.far = d * 20;
+    camera.updateProjectionMatrix();
+    controls.update();
+  }
+
+  const TABLE_HEIGHT = 740; // mm, gulv til topflade (Bauhaus: 180x74x74) - samme stoerrelsesorden som bredden
+  const FLOOR_Y = -(TABLE_HEIGHT - TABLE.thick);
+
+  // Bordplade-reference: blow-moldet udseende med langsgaaende forstivnings-ribber
+  // paa undersiden, som paa de rigtige HDPE-bordplader (se afsnit 02/kilderne).
+  const plasticMat = new THREE.MeshStandardMaterial({
+    color: 0xeae4d5, transparent: true, opacity: 0.58,
+    roughness: 0.55, metalness: 0.03, side: THREE.DoubleSide, depthWrite: false
+  });
+  function buildTableHalf(halfLen){
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(new THREE.BoxGeometry(halfLen, TABLE.thick, TABLE.width), plasticMat));
+    const ribCount = 8, ribInset = 45, ribW = 15, ribH = 5;
+    const ribLen = halfLen - 50;
+    for (let i = 0; i < ribCount; i++){
+      const t = (i + 0.5) / ribCount;
+      const z = -TABLE.width / 2 + ribInset + t * (TABLE.width - 2 * ribInset);
+      const rib = new THREE.Mesh(new THREE.BoxGeometry(ribLen, ribH, ribW), plasticMat);
+      rib.position.set(0, -TABLE.thick / 2 - ribH / 2, z);
+      group.add(rib);
+    }
+    return group;
+  }
+  function buildTableRef(){
+    const g = new THREE.Group();
+    const halfLen = TABLE.half - TABLE.gap / 2;
+    const a = buildTableHalf(halfLen);
+    a.position.set(-(TABLE.gap / 2 + halfLen / 2), TABLE.thick / 2, -TABLE.width / 2);
+    const b = buildTableHalf(halfLen);
+    b.position.set((TABLE.gap / 2 + halfLen / 2), TABLE.thick / 2, -TABLE.width / 2);
+    g.add(a, b);
+    return g;
+  }
+
+  // Benstel: rigtigt "X-ben"-stel (saksemekanisme) som paa de aegte borde -
+  // to krydsende ben pr. langside, forbundet af et tvaerroer for sideretnings-
+  // stivhed. Skematisk proportioneret efter et referencefoto, IKKE en maalt
+  // kopi af et specifikt maerkes faktiske laase-mekanisme.
+  const steelMat = new THREE.MeshStandardMaterial({
+    color: 0x9aa1aa, roughness: 0.35, metalness: 0.65, transparent: true, opacity: 0.88
+  });
+  const footMat = new THREE.MeshStandardMaterial({ color: 0x1d1f22, roughness: 0.85, metalness: 0.1 });
+  const pivotMat = new THREE.MeshStandardMaterial({ color: 0x3a3d42, roughness: 0.4, metalness: 0.7 });
+
+  function tube(p1, p2, r){
+    const dir = p2.clone().sub(p1);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 12), steelMat);
+    m.position.copy(p1).add(p2).multiplyScalar(0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    return m;
+  }
+
+  // Et enkelt X: to ben der krydser hinanden mellem to hængselpunkter foroven
+  // og to fodender forneden (hinge-venstre -> fod-højre, hinge-højre -> fod-venstre).
+  function buildXLeg(hingeX1, hingeX2, footSpread, zPos, topY){
+    const g = new THREE.Group();
+    const midX = (hingeX1 + hingeX2) / 2;
+    const hingeL = new THREE.Vector3(hingeX1, topY, zPos);
+    const hingeR = new THREE.Vector3(hingeX2, topY, zPos);
+    const footL = new THREE.Vector3(midX - footSpread, FLOOR_Y, zPos);
+    const footR = new THREE.Vector3(midX + footSpread, FLOOR_Y, zPos);
+
+    g.add(tube(hingeL, footR, 8));
+    g.add(tube(hingeR, footL, 8));
+
+    const pivot = new THREE.Mesh(new THREE.SphereGeometry(10, 12, 12), pivotMat);
+    pivot.position.set(midX, (topY + FLOOR_Y) / 2, zPos);
+    g.add(pivot);
+
+    [footL, footR].forEach(f => {
+      const foot = new THREE.Mesh(new THREE.CylinderGeometry(12, 10, 9, 14), footMat);
+      foot.position.copy(f).add(new THREE.Vector3(0, 4.5, 0));
+      g.add(foot);
+    });
+    return { group: g, pivotY: (topY + FLOOR_Y) / 2 };
+  }
+
+  function buildLegUnit(centerX){
+    const g = new THREE.Group();
+    const topY = -6, edgeInset = 60;
+    const zNear = -edgeInset;
+    const zFar = -TABLE.width + edgeInset;
+    const hingeSpread = 70, footSpread = 95;
+
+    const xA = buildXLeg(centerX - hingeSpread / 2, centerX + hingeSpread / 2, footSpread, zNear, topY);
+    const xB = buildXLeg(centerX - hingeSpread / 2, centerX + hingeSpread / 2, footSpread, zFar, topY);
+    g.add(xA.group, xB.group);
+
+    [zNear, zFar].forEach(z => {
+      const hinge = new THREE.Mesh(new THREE.BoxGeometry(hingeSpread + 30, 9, 40), pivotMat);
+      hinge.position.set(centerX, topY + 4.5, z);
+      g.add(hinge);
+    });
+
+    // tvaerroer mellem de to X'er, i krydsningshøjden, for sideretnings-stivhed
+    g.add(tube(
+      new THREE.Vector3(centerX, xA.pivotY, zNear),
+      new THREE.Vector3(centerX, xB.pivotY, zFar),
+      6
+    ));
+    return g;
+  }
+
+  function buildLegs(){
+    const g = new THREE.Group();
+    g.add(buildLegUnit(-750), buildLegUnit(750));
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(1500, 48),
+      new THREE.MeshBasicMaterial({ color: 0xb9c2cf, transparent: true, opacity: 0.1, side: THREE.DoubleSide })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, FLOOR_Y, -TABLE.width / 2);
+    g.add(floor);
+    return g;
+  }
+
+  const tableRef = buildTableRef();
+  tableRef.add(buildLegs());
+  scene.add(tableRef);
+
+  // ---- Maal-annotationer: linje + to prikker + CSS2D-label midt paa ----
+  const dimGroup = new THREE.Group();
+  function addDimension(p1, p2, text){
+    const dimColorCss = getComputedStyle(document.documentElement).getPropertyValue('--dim').trim() || '#9c5a0a';
+    const dimColor = new THREE.Color(dimColorCss);
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...p1), new THREE.Vector3(...p2)]),
+      new THREE.LineBasicMaterial({ color: dimColor })
+    );
+    dimGroup.add(line);
+    const dotGeo = new THREE.SphereGeometry(5, 10, 10);
+    const dotMat = new THREE.MeshBasicMaterial({ color: dimColor });
+    [p1, p2].forEach(p => {
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.set(...p);
+      dimGroup.add(dot);
+    });
+    const div = document.createElement('div');
+    div.className = 'dim-label';
+    div.textContent = text;
+    const label = new CSS2DObject(div);
+    label.position.set((p1[0]+p2[0])/2, (p1[1]+p2[1])/2, (p1[2]+p2[2])/2);
+    dimGroup.add(label);
+  }
+  addDimension([-TABLE.half, TABLE.thick, 0], [TABLE.half, TABLE.thick, 0], '1800 mm');
+  addDimension([TABLE.half, TABLE.thick, 0], [TABLE.half, TABLE.thick, -TABLE.width], '740 mm');
+  addDimension([TABLE.half, 0, 0], [TABLE.half, TABLE.thick, 0], '32 mm');
+  addDimension([TABLE.half + 60, TABLE.thick, 0], [TABLE.half + 60, FLOOR_Y, 0], '740 mm');
+  addDimension([0, -2, -20], [150, -2, -20], '150 mm');
+  addDimension([0, -2, -20], [0, -2, -720], '700 mm');
+  scene.add(dimGroup);
+
+  let partMesh = null;
+  const wireMat = new THREE.MeshBasicMaterial({ color: 0x2b5fac, wireframe: true });
+
+  fetch('bracket-stl.txt')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+    .then(buf => {
+      const geometry = new STLLoader().parse(buf);
+      // STL er i X(bordlaengde, seam ved 0)/Y(bordbredde, 0..740)/Z(op, 0=bordunderside).
+      // THREE bruger Y som op: roter -90 grader om X saa STL.z -> THREE.y og STL.y -> -THREE.z.
+      geometry.rotateX(-Math.PI / 2);
+      geometry.computeVertexNormals();
+
+      const material = new THREE.MeshStandardMaterial({
+        color: tokens.accent, roughness: 0.55, metalness: 0.12, flatShading: true
+      });
+      partMesh = new THREE.Mesh(geometry, material);
+      scene.add(partMesh);
+
+      modelCenter = new THREE.Vector3(0, FLOOR_Y * 0.48, -TABLE.width / 2);
+      modelRadius = Math.max(TABLE.half, TABLE.width, Math.abs(FLOOR_Y)) * 0.68;
+      frameView('iso');
+      msg.remove();
+    })
+    .catch(err => {
+      msg.textContent = 'Kunne ikke indlaese 3D-modellen (' + err.message + '). Se de statiske billeder i afsnit 08.';
+    });
+
+  function resize(){
+    const w = box.clientWidth, h = box.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    labelRenderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(box);
+  resize();
+
+  (function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+  })();
+
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      btn.setAttribute('aria-pressed', 'true');
+      controls.autoRotate = false;
+      frameView(btn.dataset.view);
+    });
+  });
+  const tableBtn = document.getElementById('toggle-table');
+  tableBtn.addEventListener('click', () => {
+    tableRef.visible = !tableRef.visible;
+    tableBtn.setAttribute('aria-pressed', String(tableRef.visible));
+    tableBtn.textContent = 'Bordplade: ' + (tableRef.visible ? 'til' : 'fra');
+  });
+  const dimsBtn = document.getElementById('toggle-dims');
+  dimsBtn.addEventListener('click', () => {
+    dimGroup.visible = !dimGroup.visible;
+    dimsBtn.setAttribute('aria-pressed', String(dimGroup.visible));
+    dimsBtn.textContent = 'Maal: ' + (dimGroup.visible ? 'til' : 'fra');
+  });
+  const wireBtn = document.getElementById('toggle-wire');
+  wireBtn.addEventListener('click', () => {
+    if (!partMesh) return;
+    const isWire = wireBtn.getAttribute('aria-pressed') === 'true';
+    partMesh.material = isWire ? new THREE.MeshStandardMaterial({ color: tokens.accent, roughness: 0.55, metalness: 0.12, flatShading: true }) : wireMat;
+    wireBtn.setAttribute('aria-pressed', String(!isWire));
+  });
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      tokens = readTokens();
+      scene.background = new THREE.Color(tokens.bg);
+    });
+  }
+</script>
