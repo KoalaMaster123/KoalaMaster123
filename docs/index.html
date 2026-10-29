@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Kryds-forst&aelig;rker: en skruel&oslash;s klik-p&aring;-forst&aelig;rker, der redder festivalbordet ved midtersamlingen.">
-<title>Kryds-forstærker</title>
+<title>Bordfix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -237,6 +237,7 @@
             <button class="v-btn" data-dims="off" aria-pressed="false">Fra</button>
           </div>
           <button class="v-btn" id="toggle-table" aria-pressed="true">Bordplade: til</button>
+          <button class="v-btn" id="toggle-paint" aria-pressed="true">Maling: til</button>
           <button class="v-btn" id="toggle-wire" aria-pressed="false">Tr&aring;dnet</button>
         </div>
       </div>
@@ -556,6 +557,35 @@
   const tableRef = buildTableRef();
   tableRef.add(buildLegs());
   scene.add(tableRef);
+
+  // Malet bordplade: et rigtigt festivalbord (foto, rettet ud til 1800 x 740 mm),
+  // lagt som et tyndt lag oven paa hver halvdel, saa samlingen stadig ses.
+  const paintGroup = new THREE.Group();
+  new THREE.TextureLoader().load('painted-table.jpg', tex => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.7, metalness: 0 });
+    const halfLen = TABLE.half - TABLE.gap / 2;
+    [-1, 1].forEach(side => {
+      const geo = new THREE.PlaneGeometry(halfLen, TABLE.width);
+      geo.rotateX(-Math.PI / 2);
+      const u0 = side < 0 ? 0 : (TABLE.half + TABLE.gap / 2) / (2 * TABLE.half);
+      const u1 = side < 0 ? halfLen / (2 * TABLE.half) : 1;
+      const uv = geo.attributes.uv;
+      for (let i = 0; i < uv.count; i++) uv.setX(i, u0 + uv.getX(i) * (u1 - u0));
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(side * (TABLE.gap / 2 + halfLen / 2), TABLE.thick + 0.6, -TABLE.width / 2);
+      paintGroup.add(m);
+    });
+  });
+  tableRef.add(paintGroup);
+  const paintBtn = document.getElementById('toggle-paint');
+  paintBtn.addEventListener('click', () => {
+    paintGroup.visible = !paintGroup.visible;
+    paintBtn.setAttribute('aria-pressed', String(paintGroup.visible));
+    paintBtn.textContent = 'Maling: ' + (paintGroup.visible ? 'til' : 'fra');
+  });
+
 
   // ---- Maal i teknisk-tegnings-stil ----
   // Hver maallinje er forskudt ud fra emnet, har hjaelpelinjer tilbage til de maalte
