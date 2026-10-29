@@ -175,6 +175,16 @@
     .dim-label .dim-name{display:none}
     .dim-label .dim-val{font-size:10.5px}
   }
+  /* ---- toppen: vaerditilbuddet ---- */
+  .hero{gap:14px}
+  .hero h1{font-size:clamp(30px,6vw,44px); line-height:1.08; letter-spacing:-.02em; max-width:18ch}
+  .hero .lede{font-size:17px; max-width:60ch}
+  .vp{list-style:none; margin:6px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+  .vp-item{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:5px; min-width:0}
+  .vp-item.lead{background:var(--accent-soft); border-color:transparent}
+  .vp-item h3{margin:0; font-size:16.5px; line-height:1.25; text-wrap:balance}
+  .vp-item p{font-size:13.5px; color:var(--fg-muted)}
+  .vp-k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--accent)}
 </style>
 </head>
 <body>
@@ -182,15 +192,31 @@
 
 <div class="wrap">
 
-  <header class="page">
-    <span class="eyebrow">Festival-bord &middot; X-version</span>
-    <h1>Kryds-forst&aelig;rker</h1>
-    <p class="lede">&Eacute;n st&oslash;bt plastdel med fire kant-kloer og to diagonaler, der krydser hinanden i et nav lige under midtersamlingen &mdash; der, hvor bordet kn&aelig;kker.</p>
+  <header class="page hero">
+    <span class="eyebrow">Kryds-forst&aelig;rker &middot; reddincamp.dk</span>
+    <h1>Red festivalbordet &mdash; smid det ikke ud</h1>
+    <p class="lede">Det klassiske festivalbord kn&aelig;kker n&aelig;sten altid samme sted: i samlingen p&aring; midten. S&aring; ender det i containeren, og et nyt skal k&oslash;bes og sl&aelig;bes ind, ogs&aring; selvom I har brugt timer p&aring; at male det gamle. Kryds-forst&aelig;rkeren klikkes p&aring; under bordet p&aring; et minut og holder det samlet resten af festivalen.</p>
+    <ul class="vp" aria-label="Det l&oslash;ser vi">
+      <li class="vp-item lead">
+        <span class="vp-k">Mindre affald</span>
+        <h3>Under 1 kg i stedet for 11 kg</h3>
+        <p>&Eacute;n lille plastdel redder et bord af plast og st&aring;l, som ellers ville ende som affald efter festivalen.</p>
+      </li>
+      <li class="vp-item">
+        <span class="vp-k">Behold jeres bord</span>
+        <h3>Det malede bord bliver i campen</h3>
+        <p>Det personlige bord, I har brugt timer p&aring;, holder hele festivalen i stedet for at blive skiftet ud med et nyt og kedeligt.</p>
+      </li>
+      <li class="vp-item">
+        <span class="vp-k">Klik p&aring;. F&aelig;rdig.</span>
+        <h3>Ingen skruer, intet v&aelig;rkt&oslash;j</h3>
+        <p>Kloerne griber om bordkanten, og krydset tager belastningen ved samlingen. Ingen tur ind efter et nyt bord.</p>
+      </li>
+    </ul>
     <div class="status-row">
-      <span class="pill">Koncept v0.2</span>
+      <span class="pill">Koncept v0.7</span>
       <span class="pill">&Eacute;n st&oslash;bt del</span>
       <span class="pill">Salgspris 89,95 kr.</span>
-      <span class="pill">Ikke produktionsklar</span>
     </div>
   </header>
 
@@ -228,8 +254,8 @@
   <section aria-labelledby="h-concept">
     <h2 id="h-concept"><span class="n">02</span> S&aring;dan virker det</h2>
     <div class="card">
-      <p>De fire kloer sidder pr&aelig;cis som p&aring; H-rammen: 150&nbsp;mm ind p&aring; hver bordplade-halvdel, 20&nbsp;mm inde fra hver langside. To diagonaler forbinder hver klo med kloen i det modsatte hj&oslash;rne og krydser hinanden i et nav, der sidder lige under midten af samlingen og trykker op mod den. Det hele st&oslash;bes i &eacute;t stykke.</p>
-      <p class="muted" style="margin-top:10px">Diagonalerne er en &aring;ben kanal ligesom H-rammens, men med <strong>skr&aring; zigzag-ribber</strong> indvendigt. N&aring;r bordet vil kn&aelig;kke, rammer kraften diagonalerne p&aring; skr&aring;, og det meste af den bliver til vridning. En glat &aring;ben kanal giver sig meget i vridning; ribberne binder sidev&aelig;ggene sammen og g&oslash;r profilen langt stivere, uden at den holder op med at kunne st&oslash;bes. Vend modellen for at se ribberne nedefra.</p>
+      <p>Fire kloer sidder 150&nbsp;mm ind p&aring; hver bordplade-halvdel, 20&nbsp;mm inde fra hver langside. To diagonaler forbinder hver klo med kloen i det modsatte hj&oslash;rne og krydser hinanden i et nav, der sidder lige under midten af samlingen og trykker op mod den. Det hele st&oslash;bes i &eacute;t stykke.</p>
+      <p class="muted" style="margin-top:10px">Diagonalerne er en &aring;ben kanal med <strong>skr&aring; zigzag-ribber</strong> indvendigt. N&aring;r bordet vil kn&aelig;kke, rammer kraften diagonalerne p&aring; skr&aring;, og det meste af den bliver til vridning. En glat &aring;ben kanal giver sig meget i vridning; ribberne binder sidev&aelig;ggene sammen og g&oslash;r profilen langt stivere, uden at den holder op med at kunne st&oslash;bes. Vend modellen for at se ribberne nedefra.</p>
     </div>
   </section>
 
@@ -241,7 +267,7 @@
         <tbody>
           <tr><td class="lbl">Diagonal, klo til modsat klo</td><td class="num">762 mm</td><td><span class="tag ok">afledt af klo-placering</span></td></tr>
           <tr><td class="lbl">Vinkel til bordets l&aelig;ngderetning</td><td class="num">67&deg;</td><td><span class="tag ok">afledt</span></td></tr>
-          <tr><td class="lbl">Klo til samling</td><td class="num">150 mm</td><td><span class="tag ok">samme som H</span></td></tr>
+          <tr><td class="lbl">Klo til samling</td><td class="num">150 mm</td><td><span class="tag ok">designvalg</span></td></tr>
           <tr><td class="lbl">Diagonal-profil</td><td class="num">34 &times; 26 mm, v&aelig;g 3</td><td><span class="tag ok">designvalg</span></td></tr>
           <tr><td class="lbl">Skr&aring; ribber i kanalen</td><td class="num">2,5 mm, hver 45 mm</td><td><span class="tag ok">designvalg</span></td></tr>
           <tr><td class="lbl">Nav ved krydsningen</td><td class="num">&Oslash;80 &times; 26 mm</td><td><span class="tag ok">designvalg</span></td></tr>
@@ -253,32 +279,13 @@
     <p class="muted">Bordets egne m&aring;l (1800 &times; 740 &times; 32&nbsp;mm, 740&nbsp;mm h&oslash;jt) er bekr&aelig;ftet ud fra producenternes data for Bauhaus, Jula, Gardeon og Trigano. Skift til "Bord" over 3D-modellen for at se dem.</p>
   </section>
 
-  <section aria-labelledby="h-compare">
-    <h2 id="h-compare"><span class="n">04</span> Sammenligning med H-rammen</h2>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Egenskab</th><th>X-version</th><th>H-ramme</th></tr></thead>
-        <tbody>
-          <tr><td class="lbl">Stivhed mod vridning</td><td><span class="tag ok">h&oslash;j</span> diagonalerne l&aring;ser rammen</td><td><span class="tag est">&aring;bent sp&oslash;rgsm&aring;l</span></td></tr>
-          <tr><td class="lbl">Stivhed mod kn&aelig;k</td><td><span class="tag est">afh&aelig;nger af ribberne</span> ca. 92&nbsp;% af kraften bliver til vridning af diagonalerne</td><td><span class="tag ok">direkte</span> rails ligger langs b&oslash;jningsretningen</td></tr>
-          <tr><td class="lbl">St&oslash;tte under samlingen</td><td>Nav midt p&aring; samlingen</td><td>Tv&aelig;rbj&aelig;lke langs hele samlingen</td></tr>
-          <tr><td class="lbl">Ribber under bordpladen</td><td><span class="tag est">konflikt</span> diagonalerne krydser dem p&aring; skr&aring;</td><td><span class="tag ok">mindre problem</span> rails l&oslash;ber parallelt med dem</td></tr>
-          <tr><td class="lbl">Profil i alt</td><td class="num">~1520 mm</td><td class="num">~1300 mm</td></tr>
-          <tr><td class="lbl">Produktion</td><td>&Eacute;n st&oslash;bt del</td><td>&Eacute;n st&oslash;bt del + st&aring;lindl&aelig;g</td></tr>
-          <tr><td class="lbl">Formst&oslash;rrelse</td><td>Samme fodaftryk (~340 &times; 750 mm)</td><td>~340 &times; 750 mm</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="muted">Tallet 92&nbsp;% kommer fra vinklen: diagonalen st&aring;r 67&deg; fra den retning bordet b&oslash;jer i, s&aring; sin(67&deg;) &asymp; 0,92 af kn&aelig;k-momentet bliver til vridning og cos(67&deg;) &asymp; 0,39 til b&oslash;jning. Derfor er ribberne ikke pynt, men det, der skal f&aring; X-versionen til at virke.</p>
-  </section>
-
   <section aria-labelledby="h-materials">
-    <h2 id="h-materials"><span class="n">05</span> Materiale og produktion</h2>
+    <h2 id="h-materials"><span class="n">04</span> Materiale og produktion</h2>
     <div class="mat-grid">
       <div class="mat-card">
         <span class="part">Hele delen</span>
         <h3>PA6-GF30 (glasfiberforst&aelig;rket nylon)</h3>
-        <p>Samme materiale som H-rammens kloer. Stift og slagfast, og billigt nok til &eacute;n st&oslash;bt del uden indl&aelig;g.</p>
+        <p>Stift og slagfast, og billigt nok til &eacute;n st&oslash;bt del uden indl&aelig;g.</p>
       </div>
       <div class="mat-card">
         <span class="part">V&aelig;gtykkelse</span>
@@ -287,14 +294,14 @@
       </div>
       <div class="mat-card">
         <span class="part">Formen</span>
-        <h3>Samme st&oslash;rrelse som H-rammen</h3>
-        <p>Fodaftrykket er det samme, s&aring; overslaget fra Krebs &amp; Co p&aring; 70.000 kr. b&oslash;r ramme nogenlunde. Profilen er ca. 17&nbsp;% l&aelig;ngere, s&aring; stykprisen kan blive lidt over 15 kr.</p>
+        <h3>Ca. 340 &times; 750 mm</h3>
+        <p>Overslaget fra Krebs &amp; Co er 70.000 kr. for formen og ca. 15 kr. pr. stk. Formen holder til 5.000&ndash;10.000 enheder.</p>
       </div>
     </div>
   </section>
 
   <section aria-labelledby="h-econ">
-    <h2 id="h-econ"><span class="n">06</span> &Oslash;konomi ved 89,95 kr.</h2>
+    <h2 id="h-econ"><span class="n">05</span> &Oslash;konomi ved 89,95 kr.</h2>
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Post</th><th class="num">Pr. stk.</th><th>Note</th></tr></thead>
@@ -311,31 +318,8 @@
     <p class="muted">Formen er tjent hjem efter ca. 1.230 solgte (70.000 kr. / 56,96 kr.). Ved 5.000 solgte direkte er der ca. 215.000 kr. tilbage f&oslash;r emballage, fragt og andre omkostninger. Til den pris er der ogs&aring; plads til at s&aelig;lge gennem forhandlere, fx boderne ved indgangene: f&aring;r de en tredjedel af prisen uden moms (ca. 24 kr.), er der stadig 19&ndash;26 kr. tilbage pr. stk.</p>
   </section>
 
-  <section aria-labelledby="h-open">
-    <h2 id="h-open"><span class="n">07</span> &Aring;bent, f&oslash;r der v&aelig;lges</h2>
-    <div class="card">
-      <ul class="clean">
-        <li>Er de ribbede diagonaler stive nok mod selve kn&aelig;kket? Det afg&oslash;res bedst ved at 3D-printe begge versioner og teste dem side om side p&aring; samme bord.</li>
-        <li>Ribberne under bordpladen: diagonalerne skal enten s&aelig;nkes ca. 5&nbsp;mm (h&oslash;jere f&oslash;dder) eller have udsparinger, s&aring; de ikke st&oslash;der mod bordets ribber. Det kr&aelig;ver det rigtige ribbe-m&oslash;nster fra et fysisk bord.</li>
-        <li>Sp&oslash;rg Krebs &amp; Co, hvilken version overslaget gjaldt, og f&aring; en pris p&aring; netop denne del.</li>
-        <li>Samme &aring;bne punkter som H-rammen: kant-profil og vippel&aring;sens kamprofil.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-gallery">
-    <h2 id="h-gallery"><span class="n">08</span> Statiske referencebilleder</h2>
-    <div class="gallery">
-      <figure><img src="xbrace_hero.png" alt="Isometrisk visning med bordplade"><figcaption>Isometrisk, m. bordplade</figcaption></figure>
-      <figure><img src="xbrace_part.png" alt="Isometrisk visning af krydset alene"><figcaption>Isometrisk, kun del</figcaption></figure>
-      <figure><img src="xbrace_under.png" alt="Krydset set nedefra med ribber"><figcaption>Nedefra, ribber</figcaption></figure>
-      <figure><img src="xbrace_plan.png" alt="Plan oppefra"><figcaption>Plan (oppefra)</figcaption></figure>
-      <figure><img src="xbrace_end.png" alt="Gavl-snit"><figcaption>Gavl-snit</figcaption></figure>
-    </div>
-  </section>
-
   <section aria-labelledby="h-voices">
-    <h2 id="h-voices"><span class="n">09</span> Hvad siger festivalg&aelig;sterne?</h2>
+    <h2 id="h-voices"><span class="n">06</span> Hvad siger festivalg&aelig;sterne?</h2>
     <div class="card survey">
       <div class="survey-head">
         <h3>Svar fra 10 festivalg&aelig;ster</h3>
@@ -370,7 +354,7 @@
   </section>
 
   <footer>
-    Videreudvikling af H-rammen. Alle m&aring;l i mm. Konceptdokument, ikke en produktionstegning.
+    Alle m&aring;l i mm. Konceptdokument, ikke en produktionstegning.
   </footer>
 </div>
 
@@ -698,7 +682,7 @@
       msg.remove();
     })
     .catch(err => {
-      msg.textContent = 'Kunne ikke indlaese 3D-modellen (' + err.message + '). Se de statiske billeder i afsnit 08.';
+      msg.textContent = 'Kunne ikke indl' + String.fromCharCode(230) + 'se 3D-modellen (' + err.message + '). Genindl' + String.fromCharCode(230) + 's siden for at pr' + String.fromCharCode(248) + 've igen.';
     });
 
   function resize(){
