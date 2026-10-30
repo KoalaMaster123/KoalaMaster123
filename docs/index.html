@@ -208,6 +208,18 @@
   .bmc-ka{grid-area:ka} .bmc-ks{grid-area:ks} .bmc-om{grid-area:om} .bmc-in{grid-area:in}
   .bmc-hint{display:none; font-size:12.5px; color:var(--fg-muted)}
   @media (max-width:800px){ .bmc-hint{display:block} }
+  /* ---- markedet (TAM) ---- */
+  .tam-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+  .tam-stat{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:2px}
+  .tam-stat:first-child{background:var(--accent-soft); border-color:transparent}
+  .tam-k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--accent)}
+  .tam-big{font-size:clamp(28px,5vw,36px); font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.15}
+  .tam-sub{font-size:13px; color:var(--fg-muted)}
+  .tam-table td.num, .tam-table th.num{text-align:right}
+  .tam-note{display:block; font-family:var(--font-display); font-size:11.5px; color:var(--fg-muted); white-space:normal}
+  .tam-table tfoot td{padding:10px 12px; border-top:2px solid var(--border); font-weight:600; background:var(--surface-2)}
+  table.tam-table{min-width:0}
+  @media (max-width:480px){ table.tam-table{font-size:13px} .tam-table thead th{white-space:normal} .tam-table td, .tam-table th{padding-left:9px; padding-right:9px} }
 </style>
 </head>
 <body>
@@ -388,8 +400,30 @@
     </div>
   </section>
 
+  <section aria-labelledby="h-tam">
+    <h2 id="h-tam"><span class="n">07</span> Markedet (TAM)</h2>
+    <div class="tam-stats">
+      <div class="tam-stat"><span class="tam-k">TAM &middot; festivaldeltagere</span><span class="tam-big">267.500</span><span class="tam-sub">p&aring; de fem festivaler</span></div>
+      <div class="tam-stat"><span class="tam-k">Heraf campister</span><span class="tam-big">152.500</span><span class="tam-sub">dem, der har et bord i campen</span></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tam-table">
+        <thead><tr><th>Festival</th><th class="num">Deltagere</th><th class="num">Camperende deltagere</th></tr></thead>
+        <tbody>
+          <tr><td class="lbl">Roskilde Festival</td><td class="num">130.000</td><td class="num">100.000 <span class="tam-note">50.000 telte &times; 2</span></td></tr>
+          <tr><td class="lbl">Smukfest</td><td class="num">62.500 <span class="tam-note">pr. dag</span></td><td class="num">30.000</td></tr>
+          <tr><td class="lbl">Jelling Musikfestival</td><td class="num">40.000</td><td class="num">12.000</td></tr>
+          <tr><td class="lbl">Nibe Festival</td><td class="num">20.000 <span class="tam-note">pr. dag</span></td><td class="num">6.500</td></tr>
+          <tr><td class="lbl">T&oslash;nder Festival</td><td class="num">15.000</td><td class="num">4.000</td></tr>
+        </tbody>
+        <tfoot><tr><td class="lbl">I alt</td><td class="num">267.500</td><td class="num">152.500</td></tr></tfoot>
+      </table>
+    </div>
+    <p class="muted">Smukfest og Nibe er opgjort som deltagere pr. dag. Roskildes campister er regnet som 50.000 telte med 2 personer i hver.</p>
+  </section>
+
   <section aria-labelledby="h-voices">
-    <h2 id="h-voices"><span class="n">07</span> Hvad siger festivalg&aelig;sterne?</h2>
+    <h2 id="h-voices"><span class="n">08</span> Hvad siger festivalg&aelig;sterne?</h2>
     <div class="card survey">
       <div class="survey-head">
         <h3>Svar fra 10 festivalg&aelig;ster</h3>
